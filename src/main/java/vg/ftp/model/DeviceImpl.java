@@ -62,6 +62,6 @@ public class DeviceImpl implements Device {
 
     @Override
     public String getVolumeLabel() {
-        return null;
+        return rootDirectory.toString();
     }
 }

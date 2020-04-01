@@ -34,14 +34,18 @@ public class FtpLoadBalancer {
 
             ftpFileLoader = new FtpFileLoaderImpl(config, ftpServerInfo, device.getRootDirectory());
             ftpPathFilter = new FtpPathFilterImpl();
-            //"fcs_regions/Adygeja_Resp/contracts/contract_Adygeja_Resp_2014010100_2014020100_001.xml.zip"
-            String regCatalog = "fcs_regions/A*/contracts/contract_[A-L]*";
-            String regFile = "fcs_regions/[a-zA-Z_0-9]*/contract_[a-zA-Z_0-9]*.xml.zip";
+            // "/fcs_regions/Adygeja_Resp/contracts/contract_Adygeja_Resp_2014010100_2014020100_001.xml.zip"
+            // /fcs_regions/Adygeja_Resp/contracts/currMonth/
+            //  /fcs_regions/Burjatija_Resp/notifications/notification_Burjatija_Resp_2019090100_2019100100_001.xml.zip
+            //  /fcs_regions/Amurskaja_obl/contracts/contract_Amurskaja_obl_2017100100_2017110100_001.xml.zip
+            String regCatalog = "/fcs_regions/A[a-zA-Z_0-9]*/contracts/";
+            String regFile = "/fcs_regions/.*/contract_[a-zA-Z_0-9]*.xml.zip";
             if (deviceCounter == 0) {
-                regCatalog = "fcs_regions/A[a-zA-Z_0-9]*/contracts/contract_[a-zA-Z_0-9]*";
+                regCatalog = "/fcs_regions/A[a-zA-Z_0-9]*/contracts";
+                //   regCatalog = "/fcs_regions/A.*/notifications/";
             }
             if (deviceCounter == 1) {
-                regCatalog = "fcs_regions/M[a-zA-Z_0-9]*/contracts/contract_[a-zA-Z_0-9]*";
+                regCatalog = "/fcs_regions/M[a-zA-Z_0-9]*/contracts";
             }
             List<String> matchCatalogNames = new ArrayList();
             List<String> matchFileNames = new ArrayList();
@@ -52,6 +56,7 @@ public class FtpLoadBalancer {
             ftpPathFilter.setPatternFileNames(matchFileNames);
             ftpFileLoader.setPathFilter(ftpPathFilter);
             loader = new Thread(ftpFileLoader);
+            loader.setName(" Поток для устройства " + device.getVolumeLabel());
             loader.start();
             deviceCounter++;
 

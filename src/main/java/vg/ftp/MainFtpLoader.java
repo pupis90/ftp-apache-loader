@@ -12,11 +12,12 @@ public class MainFtpLoader {
     public static void main(String[] args) {
 
         //@ToDo Это все в свойства и в Фильтры распихать
-        String srcCatalog = "fcs_regions";
-        String destinationCatalog = "C:/" + srcCatalog;
-        String fileFilter = "contract"; // ftp://ftp.zakupki.gov.ru/fcs_regions/Adygeja_Resp/contracts/"contract_Adygeja_Resp_2014010100_2014020100_001.xml.zip";
-        String catalogFilter = "fcs_regions";
-        String dateFilter = "2019";
+//        String srcCatalog = "fcs_regions";
+//        String destinationCatalog = "C:/" + srcCatalog;
+//        String fileFilter = "contract";
+//        // ftp://ftp.zakupki.gov.ru/fcs_regions/Adygeja_Resp/contracts/"contract_Adygeja_Resp_2014010100_2014020100_001.xml.zip";
+//        String catalogFilter = "fcs_regions";
+//        String dateFilter = "2019";
         boolean needInfo = false;
         boolean needLoad = true;
         //Содержание /fcs_regions/Adygeja_Resp/contracts/
