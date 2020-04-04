@@ -1,43 +1,45 @@
 package vg.ftp.services;
 
 import org.apache.commons.net.ftp.FTPClientConfig;
-import vg.ftp.data.FtpServerInfo;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import vg.ftp.model.FtpServerInfo;
 import vg.ftp.model.Device;
 
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class FtpLoadBalancer {
 
+    ApplicationContext ctx;
     private String ftpServer;
     DriverManager driverManager;
-    FTPClientConfig config;
-    FtpServerInfo ftpServerInfo;
     FtpPathFilterImpl ftpPathFilter;
 
-    public FtpLoadBalancer(FTPClientConfig _config, FtpServerInfo _ftpServerInfo) {
-        config = _config;
-        ftpServerInfo = _ftpServerInfo;
-        driverManager = new DriverManager();
-
+    public FtpLoadBalancer() {
     }
 
     public void load() throws IOException {
+        driverManager = (DriverManager) ctx.getBean("driver-manager");
         Thread loader;
         FtpFileLoaderImpl ftpFileLoader;
         List<Device> devices = driverManager.getDevices();
         int deviceCounter = 0;
         for (Device device : devices) {
-
-            ftpFileLoader = new FtpFileLoaderImpl(config, ftpServerInfo, device.getRootDirectory());
-            ftpPathFilter = new FtpPathFilterImpl();
-            // "/fcs_regions/Adygeja_Resp/contracts/contract_Adygeja_Resp_2014010100_2014020100_001.xml.zip"
+            ftpFileLoader = (FtpFileLoaderImpl) ctx.getBean("ftp-file-loader-id");
+            ftpFileLoader.setDestinationUndoCatalog("ftp");
+            ftpFileLoader.setDestinationRootPath(device.getRootDirectory());
+            ftpFileLoader.setContext(ctx);
+            ftpFileLoader.establishFtpConnection();
+            ftpPathFilter = new FtpPathFilterImpl();//@ToDo  bean
+            // /fcs_regions/Adygeja_Resp/contracts/contract_Adygeja_Resp_2014010100_2014020100_001.xml.zip
             // /fcs_regions/Adygeja_Resp/contracts/currMonth/
-            //  /fcs_regions/Burjatija_Resp/notifications/notification_Burjatija_Resp_2019090100_2019100100_001.xml.zip
-            //  /fcs_regions/Amurskaja_obl/contracts/contract_Amurskaja_obl_2017100100_2017110100_001.xml.zip
+            // /fcs_regions/Burjatija_Resp/notifications/notification_Burjatija_Resp_2019090100_2019100100_001.xml.zip
+            // /fcs_regions/Amurskaja_obl/contracts/contract_Amurskaja_obl_2017100100_2017110100_001.xml.zip
             String regCatalog = "/fcs_regions/A[a-zA-Z_0-9]*/contracts/";
             String regFile = "/fcs_regions/.*/contract_[a-zA-Z_0-9]*.xml.zip";
             if (deviceCounter == 0) {
@@ -64,4 +66,7 @@ public class FtpLoadBalancer {
     }
 
 
+    public void setContext(ApplicationContext ctx) {
+        this.ctx = ctx;
+    }
 }

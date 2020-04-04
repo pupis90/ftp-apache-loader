@@ -20,8 +20,6 @@ public class DriverManager {
     private List<FileStore> stores;
 
     public DriverManager() {
-        init();
-
     }
 
     private void init() {

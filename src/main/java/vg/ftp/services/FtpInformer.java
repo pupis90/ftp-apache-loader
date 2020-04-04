@@ -5,7 +5,7 @@ import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import sun.net.ftp.FtpProtocolException;
-import vg.ftp.data.FtpServerInfo;
+import vg.ftp.model.FtpServerInfo;
 
 import java.io.IOException;
 
@@ -29,7 +29,7 @@ public class FtpInformer {
     }
 
     public void loadInfo() {
-        FTPClient apachFtpClient = new FTPClient();
+        FTPClient apachFtpClient = new FTPClient(); //ToDo получать из контекста как прототип??
         apachFtpClient.configure(config);
         String workdir = "/";
 
@@ -45,7 +45,6 @@ public class FtpInformer {
             }
 
             apachFtpClient.login(ftpServerInfo.user, ftpServerInfo.passw);
-            ftpServerInfo = new FtpServerInfo();
             gerFtpCatalogInfo(ftpServerInfo, fileFilter, catalogFilter, apachFtpClient, workdir);
             System.err.println("Число всех отфильтрованых файлов без подсчета внутри архивов " + ftpServerInfo.filesTotalCount);
             System.err.println("Объем всех отфильтрованых файлов " + ftpServerInfo.folderVolume);

@@ -1,6 +1,12 @@
-package vg.ftp.data;
+package vg.ftp.model;
 
 public class FtpServerInfo {
+
+    public FtpServerInfo() {
+    }
+
+    ;
+
     public String ftpServer = "ftp.zakupki.gov.ru";
     public String user = "free";
     public String passw = "free";

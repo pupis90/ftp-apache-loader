@@ -8,7 +8,6 @@ public class FtpPathFilterImpl implements FtpPathFilter {
     Pattern catalogPattern;
     Pattern filePattern;
 
-
     @Override
     public List<String> getPatternCatalogNames() {
         return null;

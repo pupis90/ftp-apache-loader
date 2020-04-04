@@ -4,7 +4,8 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
-import vg.ftp.data.FtpServerInfo;
+import org.springframework.context.ApplicationContext;
+import vg.ftp.model.FtpServerInfo;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,33 +21,57 @@ import static java.nio.file.Files.newOutputStream;
 
 public class FtpFileLoaderImpl implements FtpFileLoader {
 
-    FTPClient apachFtpClient = new FTPClient();
-    final Path destinationRootPath; //Например С:\
-    String destinationUndoCatalog = "ftp";
+    FTPClient apachFtpClient;
+    Path destinationRootPath; //Например С:\
+    String destinationUndoCatalog;
+
     String rootdir = "/";
+
+    public void setDestinationRootPath(Path destinationRootPath) {
+        this.destinationRootPath = destinationRootPath;
+    }
+
+    public void setDestinationUndoCatalog(String destinationUndoCatalog) {
+        this.destinationUndoCatalog = destinationUndoCatalog;
+    }
+
+    public void setRootdir(String rootdir) {
+        this.rootdir = rootdir;
+    }
+
     private FtpPathFilter ftpPathFilter;
+    public FTPClientConfig config;
+    public FtpServerInfo ftpServerInfo;
+    private ApplicationContext ctx;
 
-    public FtpFileLoaderImpl(FTPClientConfig config, FtpServerInfo ftpServerInfo, Path deviceRootDirectoryPath) throws IOException {
+    public FtpFileLoaderImpl() {
+    }
 
-        destinationRootPath = deviceRootDirectoryPath;
+    public void establishFtpConnection() {
+        apachFtpClient = new FTPClient();
+        config = (FTPClientConfig) ctx.getBean("client-config");
+        ftpServerInfo = (FtpServerInfo) ctx.getBean("server-info");
         apachFtpClient.configure(config);
         //SocketAddress ftpAddress = new InetSocketAddress(ftpServer, 21);
         //apachFtpClient.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.err)));
-        apachFtpClient.connect(ftpServerInfo.ftpServer, 21);
-
-        int reply = apachFtpClient.getReplyCode();
-        if (!FTPReply.isPositiveCompletion(reply)) {
-            apachFtpClient.disconnect();
-            throw new IOException("Exception in connecting to FTP Server");
+        try {
+            apachFtpClient.connect(ftpServerInfo.ftpServer, 21);
+            int reply = apachFtpClient.getReplyCode();
+            if (!FTPReply.isPositiveCompletion(reply)) {
+                apachFtpClient.disconnect();
+                throw new IOException("Exception in connecting to FTP Server");
+            }
+            apachFtpClient.login(ftpServerInfo.user, ftpServerInfo.passw);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        apachFtpClient.login(ftpServerInfo.user, ftpServerInfo.passw);
-
     }
 
+    ;
 
     @Override
     public int loadFile(String dir) {
+
         try {
             long count_contracts = 0L;
             String srcFileName = " ";
@@ -106,6 +131,10 @@ public class FtpFileLoaderImpl implements FtpFileLoader {
 
 
         return 0;
+    }
+
+    public void setContext(ApplicationContext ctx) {
+        this.ctx = ctx;
     }
 
     @Override

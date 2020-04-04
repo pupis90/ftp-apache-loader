@@ -1,11 +1,13 @@
 package vg.ftp;
 
 import org.apache.commons.net.ftp.FTPClientConfig;
-import vg.ftp.data.FtpServerInfo;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import vg.ftp.services.FtpInformer;
 import vg.ftp.services.FtpLoadBalancer;
 
-
+@Configuration
 public class MainFtpLoader {
 
 
@@ -20,31 +22,36 @@ public class MainFtpLoader {
 //        String dateFilter = "2019";
         boolean needInfo = false;
         boolean needLoad = true;
+        String workdir = "/";
         //Содержание /fcs_regions/Adygeja_Resp/contracts/
-        FTPClientConfig config = new FTPClientConfig();
+
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("spring-context.xml");
+        FTPClientConfig config = (FTPClientConfig) ctx.getBean("client-config");
         config.setLenientFutureDates(true); // change required options
         config.setServerLanguageCode("ru");
-        String workdir = "/";
-        FtpServerInfo ftpServerInfo = new FtpServerInfo();
+        //FtpServerInfo ftpServerInfo = (FtpServerInfo) ctx.getBean("server-info");
 
         try {
             //SocketAddress ftpAddress = new InetSocketAddress(ftpServer, 21);
             //apachFtpClient.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.err)));
 
-
             if (needInfo) {
-                FtpInformer ftpInformer = new FtpInformer(config, ftpServerInfo);
+                FtpInformer ftpInformer = (FtpInformer) ctx.getBean("informer");
                 ftpInformer.loadInfo();
             }
 
             if (needLoad) {
-                FtpLoadBalancer ftpLoadBalancer = new FtpLoadBalancer(config, ftpServerInfo);
+
+                FtpLoadBalancer ftpLoadBalancer = (FtpLoadBalancer) ctx.getBean("ftp-file-loader-balancer");
+                ftpLoadBalancer.setContext(ctx);
                 ftpLoadBalancer.load();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        //   ((ClassPathXmlApplicationContext) ctx).close();
 
     }
 

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean id="ftp-client-config-id"
+          name="ftp-client-config" class="org.apache.commons.net.ftp.FTPClientConfig">
+    </bean>
+    <alias name="ftp-client-config" alias="client-config"/>
+
+    <bean id="ftp-server-info-id"
+          name="ftp-server-info" class="vg.ftp.model.FtpServerInfo">
+    </bean>
+    <alias name="ftp-server-info" alias="server-info"/>
+
+    <bean id="ftp-informer-id"
+          name="ftp-informer" class="vg.ftp.services.FtpInformer">
+        <constructor-arg ref="client-config"/>
+        <constructor-arg ref="server-info"/>
+    </bean>
+    <alias name="ftp-informer" alias="informer"/>
+
+    <bean id="ftp-file-loader-id"
+          name="ftp-file-loader" class="vg.ftp.services.FtpFileLoaderImpl" scope="prototype">
+    </bean>
+
+    <bean id="driver-manager-id"
+          name="driver-manager" class="vg.ftp.services.DriverManager" init-method="init">
+    </bean>
+
+    <bean id="ftp-file-loader-balancer-id"
+          name="ftp-file-loader-balancer" class="vg.ftp.services.FtpLoadBalancer">
+    </bean>
+    <alias name="ftp-file-loader-balancer" alias="balancer"/>
+
+    <context:component-scan base-package="vg"/>
+
+</beans>
