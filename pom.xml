@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>vg.ftp</groupId>
-    <artifactId>ftp-file-loader</artifactId>
+    <artifactId>ftp-file-apache-loader</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>Ftp File Loader</name>
     <properties>
