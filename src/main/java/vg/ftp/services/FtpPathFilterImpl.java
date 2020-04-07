@@ -1,12 +1,19 @@
 package vg.ftp.services;
 
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class FtpPathFilterImpl implements FtpPathFilter {
+@Component
+public class FtpPathFilterImpl implements FtpPathFilter, ApplicationContextAware {
 
     Pattern catalogPattern;
     Pattern filePattern;
+    private ApplicationContext ctx;
 
     @Override
     public List<String> getPatternCatalogNames() {
@@ -36,5 +43,10 @@ public class FtpPathFilterImpl implements FtpPathFilter {
     @Override
     public boolean isFileNameMatched(String fileName) {
         return catalogPattern.matcher(fileName).find();
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.ctx = applicationContext;
     }
 }

@@ -4,7 +4,9 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import vg.ftp.model.FtpServerInfo;
 
 import java.io.IOException;
@@ -19,7 +21,7 @@ import java.util.Date;
 
 import static java.nio.file.Files.newOutputStream;
 
-public class FtpFileLoaderImpl implements FtpFileLoader {
+public class FtpFileLoaderImpl implements FtpFileLoader, ApplicationContextAware {
 
     FTPClient apachFtpClient;
     Path destinationRootPath; //Например С:\
@@ -31,7 +33,7 @@ public class FtpFileLoaderImpl implements FtpFileLoader {
         this.destinationRootPath = destinationRootPath;
     }
 
-    public void setDestinationUndoCatalog(String destinationUndoCatalog) {
+    public void setDestinationSubCatalog(String destinationUndoCatalog) {
         this.destinationUndoCatalog = destinationUndoCatalog;
     }
 
@@ -39,10 +41,11 @@ public class FtpFileLoaderImpl implements FtpFileLoader {
         this.rootdir = rootdir;
     }
 
-    private FtpPathFilter ftpPathFilter;
-    public FTPClientConfig config;
-    public FtpServerInfo ftpServerInfo;
     private ApplicationContext ctx;
+    private FtpServerInfo ftpServerInfo;
+    private FtpPathFilter ftpPathFilter;
+    private FTPClientConfig config;
+    private String currDir;
 
     public FtpFileLoaderImpl() {
     }
@@ -67,11 +70,11 @@ public class FtpFileLoaderImpl implements FtpFileLoader {
         }
     }
 
-    ;
+
 
     @Override
     public int loadFile(String dir) {
-
+        currDir = dir;
         try {
             long count_contracts = 0L;
             String srcFileName = " ";
@@ -96,7 +99,7 @@ public class FtpFileLoaderImpl implements FtpFileLoader {
                     if (ftpPathFilter.isFileNameMatched(strSrcAbsoluteFileName) && ftpPathFilter.isCatalogNameMatched(parentDir)) {
                         System.err.println(Thread.currentThread().getName() + " " + strSrcAbsoluteFileName + " : " + new Date() + " Start");
                         fileDestinationPath = Paths.get(new URI("file:///" + destinationRootPath.toString().replace("\\", "") + "/" + destinationUndoCatalog + strSrcAbsoluteFileName));
-                        System.err.println(Thread.currentThread().getName() + " " + " Сохраняем в " + fileDestinationPath);
+                        //System.err.println(Thread.currentThread().getName() + " " + " Сохраняем в " + fileDestinationPath);
                         Path parentDirPath = fileDestinationPath.getParent();
                         if (!Files.exists(parentDirPath)) Files.createDirectories(parentDirPath);
                         OutputStream outputStream = newOutputStream(fileDestinationPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
@@ -119,7 +122,7 @@ public class FtpFileLoaderImpl implements FtpFileLoader {
                     String strSrcAbsoluteFolderName = parentDir + "/" + srcFolderName;
                     //----------
                     if (strSrcAbsoluteFolderName.startsWith("/fcs_regions")/*||strSrcAbsoluteFolderName.startsWith("/")*/) {
-                        String mess = Thread.currentThread().getName() + " " + strSrcAbsoluteFolderName + " ... " + System.lineSeparator();
+                        String mess = Thread.currentThread().getName() + "  FOLDER: " + strSrcAbsoluteFolderName + System.lineSeparator();
                         System.err.print(mess);
                         loadFile(strSrcAbsoluteFolderName);
                     }
@@ -127,14 +130,27 @@ public class FtpFileLoaderImpl implements FtpFileLoader {
             }
         } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
+            System.err.print(" current Dir " + currDir + System.lineSeparator());
+            try {
+
+                //    apachFtpClient.connect(ftpServerInfo.ftpServer, 21);
+                int reply = apachFtpClient.getReplyCode();
+                if (!FTPReply.isPositiveCompletion(reply)) {
+                    System.err.print(" По видимому ФТП не отвечает" + System.lineSeparator());
+                    System.out.print(apachFtpClient.getReplyString() + System.lineSeparator());
+                    apachFtpClient.disconnect();
+                    System.err.print(" Переподключение ... " + System.lineSeparator());
+                    establishFtpConnection();
+                }
+                //   apachFtpClient.login(ftpServerInfo.user, ftpServerInfo.passw);
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+
         }
 
 
         return 0;
-    }
-
-    public void setContext(ApplicationContext ctx) {
-        this.ctx = ctx;
     }
 
     @Override
@@ -167,5 +183,10 @@ public class FtpFileLoaderImpl implements FtpFileLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.ctx = applicationContext;
     }
 }
