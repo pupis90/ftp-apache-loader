@@ -80,6 +80,11 @@
             <artifactId>jul-to-slf4j</artifactId>
             <version>1.7.25</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.25</version>
+        </dependency>
 
     </dependencies>
     <build>
@@ -100,8 +105,8 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.wordpress.dev64.test.MainClass</mainClass>
-                            <packageName>com.wordpress.dev64.test</packageName>
+                            <mainClass>vg.ftp.MainFtpLoader</mainClass>
+                            <packageName>vg.ftp</packageName>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                         </manifest>

@@ -2,7 +2,7 @@
 <Configuration monitorInterval="5">
     <Properties>
         <Property name="log.console.charset">cp1251</Property>
-        <Property name="log.pattern">%d{yyyy-MM-dd HH:mm:ss,SSS} %-192m [%-5p] [%10.10t] [at %l]%n</Property>
+        <Property name="log.pattern">%d{yyyy-MM-dd HH:mm:ss,SSS} %-10m [%-5p] [%10.10t] [at %l]%n</Property>
         <Property name="log.rolling.file.size">30 MB</Property>
     </Properties>
     <Appenders>

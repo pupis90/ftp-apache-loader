@@ -70,7 +70,7 @@ public class QueueFtpFileLoaderImpl implements FtpFileLoader, ApplicationContext
                 //  if(strSrcAbsoluteFileName.equals("/fcs_regions/Amurskaja_obl/contracts/contract_Amurskaja_obl_2017100100_2017110100_001.xml.zip"))
                 //           System.err.print(strSrcAbsoluteFileName);
                 //
-                logger.info(Thread.currentThread().getName() + " " + srcAbsoluteFileName + " : " + new Date() + "Start load to memory " + System.lineSeparator());
+                logger.info(Thread.currentThread().getName() + " " + srcAbsoluteFileName + " : " + new Date() + "Start load to memory ");// + System.lineSeparator()
 
                 OutputStream outputStream = new SpecialByteArrayOutputStream(25000);
 
@@ -79,13 +79,13 @@ public class QueueFtpFileLoaderImpl implements FtpFileLoader, ApplicationContext
 
                 byteArrayOutputStreamsForLocalSave.put(outputStream);
 
-                logger.info(Thread.currentThread().getName() + " " + srcAbsoluteFileName + " : " + new Date() + " Loading in memory Wait saving..." + System.lineSeparator());
+                logger.info(Thread.currentThread().getName() + " " + srcAbsoluteFileName + " : " + new Date() + " Loading in memory Wait saving...");//+ System.lineSeparator()
                 count++;
 
 
             } catch (IOException | InterruptedException e) {
                 logger.error(e);
-                logger.error(" strSrcAbsoluteFileName  load failed " + System.lineSeparator());
+                logger.error(" strSrcAbsoluteFileName  load failed ");//+ System.lineSeparator()
                 specialFtpClient.attempRepeatFtpConnection();
 
             }

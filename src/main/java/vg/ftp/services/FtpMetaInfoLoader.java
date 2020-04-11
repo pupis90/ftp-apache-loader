@@ -146,7 +146,7 @@ public class FtpMetaInfoLoader {
         long countrFilesInDir = ftpServerInfo.filesTotalCount - currDirFilesStartCnt;
         long volumeDir = ftpServerInfo.folderVolume - currDirFilesVolume;
         if (countrFilesInDir != 0 || volumeDir != 0) {
-            mess += tabs + dir + " : " + countrFilesInDir + " шт. Объем: " + volumeDir + " b " + System.lineSeparator();
+            mess += tabs + dir + " : " + countrFilesInDir + " шт. Объем: " + volumeDir + " b ";//+ System.lineSeparator()
             logger.info(mess);
         }
 

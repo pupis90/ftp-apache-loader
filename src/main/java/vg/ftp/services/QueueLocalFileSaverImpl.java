@@ -55,7 +55,7 @@ public class QueueLocalFileSaverImpl implements Runnable {
                 //  if(strSrcAbsoluteFileName.equals("/fcs_regions/Amurskaja_obl/contracts/contract_Amurskaja_obl_2017100100_2017110100_001.xml.zip"))
 
                 fileDestinationPath = Paths.get(new URI("file:///" + destinationRootPath.toString().replace("\\", "") + "/" + destinationSubCatalog + strSrcAbsoluteFileName));
-                mess = Thread.currentThread().getName() + new Date() + " Сохранение файла " + strSrcAbsoluteFileName + "  в " + fileDestinationPath + " Старт " + System.lineSeparator();
+                mess = Thread.currentThread().getName() + new Date() + " Сохранение файла " + strSrcAbsoluteFileName + "  в " + fileDestinationPath + " Старт "; //+ System.lineSeparator()
                 logger.info(mess);
                 Path parentDirPath = fileDestinationPath.getParent();
                 if (!Files.exists(parentDirPath)) Files.createDirectories(parentDirPath);
@@ -63,7 +63,7 @@ public class QueueLocalFileSaverImpl implements Runnable {
                 ((SpecialByteArrayOutputStream) byteArrayOutputStream).writeTo(outputStream);
                 byteArrayOutputStream.flush();
                 byteArrayOutputStream.close();
-                mess = Thread.currentThread().getName() + new Date() + " Сохранение  " + strSrcAbsoluteFileName + " Финиш " + System.lineSeparator();
+                mess = Thread.currentThread().getName() + new Date() + " Сохранение  " + strSrcAbsoluteFileName + " Финиш "; //+ System.lineSeparator()
                 logger.info(mess);
 
             } catch (URISyntaxException | IOException | InterruptedException e) {
@@ -89,11 +89,11 @@ public class QueueLocalFileSaverImpl implements Runnable {
     public void run() {
         destinationSubCatalog = applicationConfiguration.getDestinationSubCatalog();
         Date startLoadDate = new Date();
-        String mess = startLoadDate + " " + Thread.currentThread().getName() + " Старт  " + System.lineSeparator();
+        String mess = startLoadDate + " " + Thread.currentThread().getName() + " Старт  "; //+ System.lineSeparator()
         logger.info(mess);
         saveFiles();
         Date endLoadDate = new Date();
-        mess += endLoadDate + Thread.currentThread().getName() + " Загрузка с сервера " + " завершена" + System.lineSeparator();
+        mess += endLoadDate + Thread.currentThread().getName() + " Загрузка с сервера " + " завершена"; //+ System.lineSeparator()
         logger.info(mess);
 
     }
