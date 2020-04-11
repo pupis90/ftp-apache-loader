@@ -1,6 +1,8 @@
 package vg.ftp.services;
 
 import org.apache.commons.net.ftp.FTPFile;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +23,8 @@ import static java.lang.Thread.sleep;
 
 @Service
 public class FtpLoadBalancer implements ApplicationContextAware {
+
+    private static final Logger logger = LogManager.getLogger(FtpLoadBalancer.class);
 
     ApplicationContext ctx;
 
@@ -102,23 +106,6 @@ public class FtpLoadBalancer implements ApplicationContextAware {
 
         }
 
-//                ftpFileLoader.establishFtpConnection();
-//                ftpFileLoader.setPathFilter(ftpPathFilter);
-//                loader = new Thread(ftpFileLoader);
-//                loader.setName(" Поток для устройства " + device.getVolumeLabel());
-//                loader.start();
-//                System.err.println(Thread.currentThread().getName() + " " + strSrcAbsoluteFileName + " : " + new Date() + " Start");
-//                fileDestinationPath = Paths.get(new URI("file:///" + destinationRootPath.toString().replace("\\", "") + "/" + destinationSubCatalog + strSrcAbsoluteFileName));
-//                //System.err.println(Thread.currentThread().getName() + " " + " Сохраняем в " + fileDestinationPath);
-//                Path parentDirPath = fileDestinationPath.getParent();
-//                if (!Files.exists(parentDirPath)) Files.createDirectories(parentDirPath);
-//                OutputStream outputStream = newOutputStream(fileDestinationPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-//                specialFtpClient.retrieveFile(strSrcAbsoluteFileName, outputStream);
-//                System.err.println(Thread.currentThread().getName() + " " + strSrcAbsoluteFileName + " : " + new Date() + " Stop");
-//                count_contracts++;
-//                outputStream.flush();
-//                outputStream.close();
-
     }
 
     private void putFileNamesToBlockingQueue(List<String> srcWorkDirSubFoldersAndFiles) {
@@ -126,7 +113,7 @@ public class FtpLoadBalancer implements ApplicationContextAware {
         String regCatalog = "/fcs_regions/[a-zA-Z_0-9]*/contracts/";
         //Заполнение очереди имен на обработку
         for (String dir : srcWorkDirSubFoldersAndFiles) {
-            regCatalog = dir + ".*/contracts/";
+            regCatalog = dir + ".*/contracts";
             regFile = ".*/contract_[a-zA-Z_0-9]*.xml.zip";
             List<String> matchCatalogNames = new ArrayList();
             List<String> matchFileNames = new ArrayList();
@@ -200,11 +187,11 @@ public class FtpLoadBalancer implements ApplicationContextAware {
                   */
                         if (ftpPathFilter.isFileNameMatched(strSrcAbsoluteFileName) && ftpPathFilter.isCatalogNameMatched(parentDir)) {
                             mess = Thread.currentThread().getName() + " Ставлю в очередь на загрузку" + strSrcAbsoluteFileName + System.lineSeparator();
-                            System.err.print(mess);
+                            logger.info(mess);
                             try {
                                 srcFullFileNamesForLoadFromFtp.put(strSrcAbsoluteFileName);
                             } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                logger.error(e);
                             }
                         }
 
@@ -220,14 +207,14 @@ public class FtpLoadBalancer implements ApplicationContextAware {
                 //----------
                 if (strSrcAbsoluteFolderName.startsWith("/fcs_regions")/*||strSrcAbsoluteFolderName.startsWith("/")*/) {
                     mess = Thread.currentThread().getName() + "Inspect folder: " + strSrcAbsoluteFolderName + System.lineSeparator();
-                    System.err.print(mess);
+                    logger.info(mess);
                     findAndAddQueueNameLoadFileInSubCatalogRecurcive(strSrcAbsoluteFolderName, ftpPathFilter);
                 }
 
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.print(" current Dir " + currDir + System.lineSeparator());
+            logger.error(" current Dir " + currDir + System.lineSeparator());
             specialFtpClient.attempRepeatFtpConnection();
 
         }

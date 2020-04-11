@@ -4,6 +4,8 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import sun.net.ftp.FtpProtocolException;
 import vg.ftp.config.ApplicationConfiguration;
@@ -16,6 +18,7 @@ import java.util.List;
 
 public class FtpMetaInfoLoader {
 
+    private static final Logger logger = LogManager.getLogger(FtpMetaInfoLoader.class);
     //@ToDo Это все в свойства и в Фильтры распихать
     private String logCatalog = "logftp";
     private String destinationCatalog = "D:/" + logCatalog;
@@ -66,7 +69,7 @@ public class FtpMetaInfoLoader {
             String mess = "Число всех отфильтрованых файлов без подсчета внутри архивов " + ftpServerInfo.filesTotalCount + System.lineSeparator();
             mess += "Объем всех отфильтрованых файлов " + ftpServerInfo.folderVolume + System.lineSeparator();
             mess += " Фильр каталогов " + catalogFilter + " ;  Фильтра файлов: " + fileFilter;
-            VLogger.writeLog(mess, destinationCatalog + ".txt");
+            logger.info(mess);
             apachFtpClient.disconnect();
 
 
@@ -144,8 +147,7 @@ public class FtpMetaInfoLoader {
         long volumeDir = ftpServerInfo.folderVolume - currDirFilesVolume;
         if (countrFilesInDir != 0 || volumeDir != 0) {
             mess += tabs + dir + " : " + countrFilesInDir + " шт. Объем: " + volumeDir + " b " + System.lineSeparator();
-            System.err.print(mess);
-            VLogger.writeLog(mess, destinationCatalog + ".txt");
+            logger.info(mess);
         }
 
         return ftpServerInfo;

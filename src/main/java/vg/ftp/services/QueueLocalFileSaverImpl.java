@@ -1,5 +1,7 @@
 package vg.ftp.services;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,8 @@ import static java.nio.file.Files.newOutputStream;
 @Scope("prototype")
 public class QueueLocalFileSaverImpl implements Runnable {
 
+    private static final Logger logger = LogManager.getLogger(QueueLocalFileSaverImpl.class);
+
     @Autowired
     SpecialFtpClientImpl specialFtpClient;
 
@@ -42,8 +46,8 @@ public class QueueLocalFileSaverImpl implements Runnable {
         long count = 0L;
         Path fileDestinationPath = null;
         String mess;
-
-        while (true) {
+        boolean cond = true;
+        while (cond) {
             try {
                 OutputStream byteArrayOutputStream = byteArrayOutputStreamsForLocalSave.take();
                 String strSrcAbsoluteFileName = ((SpecialByteArrayOutputStream) byteArrayOutputStream).getSrcAbsoluteFileName();
@@ -52,7 +56,7 @@ public class QueueLocalFileSaverImpl implements Runnable {
 
                 fileDestinationPath = Paths.get(new URI("file:///" + destinationRootPath.toString().replace("\\", "") + "/" + destinationSubCatalog + strSrcAbsoluteFileName));
                 mess = Thread.currentThread().getName() + new Date() + " Сохранение файла " + strSrcAbsoluteFileName + "  в " + fileDestinationPath + " Старт " + System.lineSeparator();
-                System.err.print(mess);
+                logger.info(mess);
                 Path parentDirPath = fileDestinationPath.getParent();
                 if (!Files.exists(parentDirPath)) Files.createDirectories(parentDirPath);
                 OutputStream outputStream = newOutputStream(fileDestinationPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
@@ -60,21 +64,21 @@ public class QueueLocalFileSaverImpl implements Runnable {
                 byteArrayOutputStream.flush();
                 byteArrayOutputStream.close();
                 mess = Thread.currentThread().getName() + new Date() + " Сохранение  " + strSrcAbsoluteFileName + " Финиш " + System.lineSeparator();
-                System.err.print(mess);
+                logger.info(mess);
 
             } catch (URISyntaxException | IOException | InterruptedException e) {
-                e.printStackTrace();
-                System.err.print(" current Dir " + System.lineSeparator());
+                logger.error(e);
+                logger.error(" current Dir " + System.lineSeparator());
                 specialFtpClient.attempRepeatFtpConnection();
             }
 
             count++;
+            if (destinationRootPath.toString().contains("C:") && (count > 5000)) cond = false;
 
             try {
                 sleep(100);
             } catch (InterruptedException e) {
-
-                e.printStackTrace();
+                logger.error(e);
             }
         }
 
@@ -86,11 +90,11 @@ public class QueueLocalFileSaverImpl implements Runnable {
         destinationSubCatalog = applicationConfiguration.getDestinationSubCatalog();
         Date startLoadDate = new Date();
         String mess = startLoadDate + " " + Thread.currentThread().getName() + " Старт  " + System.lineSeparator();
-        System.err.print(mess);
+        logger.info(mess);
         saveFiles();
         Date endLoadDate = new Date();
         mess += endLoadDate + Thread.currentThread().getName() + " Загрузка с сервера " + " завершена" + System.lineSeparator();
-        System.err.print(mess);
+        logger.info(mess);
 
     }
 

@@ -1,5 +1,7 @@
 package vg.ftp.services;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -14,7 +16,7 @@ import java.util.concurrent.BlockingQueue;
 import static java.lang.Thread.sleep;
 
 public class QueueFtpFileLoaderImpl implements FtpFileLoader, ApplicationContextAware {
-
+    private static final Logger logger = LogManager.getLogger(QueueFtpFileLoaderImpl.class);
 
     String rootdir = "/";
     private BlockingQueue<String> srcFullFileNamesForLoadFromFtp;
@@ -68,7 +70,7 @@ public class QueueFtpFileLoaderImpl implements FtpFileLoader, ApplicationContext
                 //  if(strSrcAbsoluteFileName.equals("/fcs_regions/Amurskaja_obl/contracts/contract_Amurskaja_obl_2017100100_2017110100_001.xml.zip"))
                 //           System.err.print(strSrcAbsoluteFileName);
                 //
-                System.err.println(Thread.currentThread().getName() + " " + srcAbsoluteFileName + " : " + new Date() + "Start load to memory " + System.lineSeparator());
+                logger.info(Thread.currentThread().getName() + " " + srcAbsoluteFileName + " : " + new Date() + "Start load to memory " + System.lineSeparator());
 
                 OutputStream outputStream = new SpecialByteArrayOutputStream(25000);
 
@@ -77,13 +79,13 @@ public class QueueFtpFileLoaderImpl implements FtpFileLoader, ApplicationContext
 
                 byteArrayOutputStreamsForLocalSave.put(outputStream);
 
-                System.err.println(Thread.currentThread().getName() + " " + srcAbsoluteFileName + " : " + new Date() + " Loading in memory Wait saving..." + System.lineSeparator());
+                logger.info(Thread.currentThread().getName() + " " + srcAbsoluteFileName + " : " + new Date() + " Loading in memory Wait saving..." + System.lineSeparator());
                 count++;
 
 
             } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-                System.err.print(" strSrcAbsoluteFileName  load failed " + System.lineSeparator());
+                logger.error(e);
+                logger.error(" strSrcAbsoluteFileName  load failed " + System.lineSeparator());
                 specialFtpClient.attempRepeatFtpConnection();
 
             }
@@ -91,7 +93,7 @@ public class QueueFtpFileLoaderImpl implements FtpFileLoader, ApplicationContext
             try {
                 sleep(100);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error(e);
             }
 
 
@@ -126,12 +128,8 @@ public class QueueFtpFileLoaderImpl implements FtpFileLoader, ApplicationContext
         loadFiles();
         Date endLoadDate = new Date();
         mess += endLoadDate + Thread.currentThread().getName() + " Загрузка с ftp сервера в буфер завершена" + System.lineSeparator();
-        System.err.print(mess);
-        try {
-            VLogger.writeLog(mess, ("D:/" + destinationSubCatalog + ".txt"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        logger.info(mess);
+
     }
 
     @Override

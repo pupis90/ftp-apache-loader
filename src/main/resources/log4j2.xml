@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="5">
+    <Properties>
+        <Property name="log.console.charset">cp1251</Property>
+        <Property name="log.pattern">%d{yyyy-MM-dd HH:mm:ss,SSS} %-192m [%-5p] [%10.10t] [at %l]%n</Property>
+        <Property name="log.rolling.file.size">30 MB</Property>
+    </Properties>
+    <Appenders>
+        <Console name="console.out.appender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${log.pattern}" charset="${log.console.charset}" header="${log.header}"/>
+            <ThresholdFilter level="WARN" onMatch="DENY" onMismatch="ACCEPT"/>
+        </Console>
+        <Console name="console.err.appender" target="SYSTEM_ERR" follow="true">
+            <PatternLayout pattern="${log.pattern}" charset="${log.console.charset}"/>
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+        <RollingFile name="file.log.appender"
+                     fileName="C:/ftp/ftp_loader.log"
+                     filePattern="${sys:irule.server.logs.path}/irule-server-%d{yyyy-MM-dd}-%i.log.zip">
+            <PatternLayout pattern="${log.pattern}" charset="${log.console.charset}" header="${log.header}"/>
+            <SizeBasedTriggeringPolicy size="${log.rolling.file.size}"/>
+        </RollingFile>
+
+
+    </Appenders>
+
+    <!-- loggers -->
+
+    <Loggers>
+
+
+        <!--
+            To output sql commands from hibernate, move to DEBUG level.
+            Warning! Do not use it on production environment, this change
+            can incredibly reduce system performance.
+        -->
+
+        <!-- Spring framework specified logging -->
+        <Logger name="org.springframework" level="WARN" additivity="false">
+            <AppenderRef ref="file.log.appender"/>
+        </Logger>
+
+        <!-- iRule specified logging -->
+        <Logger name="vg.ftp" level="INFO" additivity="false">
+            <AppenderRef ref="file.log.appender"/>
+        </Logger>
+
+        <!-- Common logging -->
+        <Root level="INFO">
+            <AppenderRef ref="file.log.appender"/>
+        </Root>
+
+    </Loggers>
+</Configuration>
