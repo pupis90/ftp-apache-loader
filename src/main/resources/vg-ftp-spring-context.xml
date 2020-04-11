@@ -21,14 +21,14 @@
     <alias name="ftp-server-info" alias="server-info"/>
 
     <bean id="ftp-informer-id"
-          name="ftp-informer" class="vg.ftp.services.FtpInformer">
+          name="ftp-informer" class="vg.ftp.services.FtpMetaInfoLoader">
         <constructor-arg ref="client-config"/>
         <constructor-arg ref="server-info"/>
     </bean>
     <alias name="ftp-informer" alias="informer"/>
 
     <bean id="ftp-file-loader-id"
-          name="ftp-file-loader" class="vg.ftp.services.FtpFileLoaderImpl" scope="prototype">
+          name="ftp-file-loader" class="vg.ftp.services.QueueFtpFileLoaderImpl" scope="prototype">
     </bean>
 
     <bean id="driver-manager-id"
