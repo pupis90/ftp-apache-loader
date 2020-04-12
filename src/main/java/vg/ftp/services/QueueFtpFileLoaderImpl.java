@@ -18,7 +18,6 @@ import static java.lang.Thread.sleep;
 public class QueueFtpFileLoaderImpl implements FtpFileLoader, ApplicationContextAware {
     private static final Logger logger = LogManager.getLogger(QueueFtpFileLoaderImpl.class);
 
-    String rootdir = "/";
     private BlockingQueue<String> srcFullFileNamesForLoadFromFtp;
     private BlockingQueue<OutputStream> byteArrayOutputStreamsForLocalSave;
     private ApplicationContext ctx;
@@ -44,62 +43,62 @@ public class QueueFtpFileLoaderImpl implements FtpFileLoader, ApplicationContext
         this.byteArrayOutputStreamsForLocalSave = byteArrayOutputStreamsForLocalSave;
     }
 
-
-    public void setRootdir(String rootdir) {
-        this.rootdir = rootdir;
-    }
-
     @Override
     public int loadFile(String dir) {
         return -1;
     }
 
+    private String srcAbsoluteFileName;
+
+    public void setNeedInterrupt(boolean needInterrupt) {
+        this.needInterrupt = needInterrupt;
+    }
+
+    private boolean needInterrupt = false;
+
+    private long failureLoadCount = 0L;
+
     @Override
-    public int loadFiles() {
+    public void loadFiles() {
 
         String mess;
-        while (true) {
+        while (!needInterrupt) {
             try {
 
                 long count = 0L;
-                String srcAbsoluteFileName = srcFullFileNamesForLoadFromFtp.take();
+                srcAbsoluteFileName = srcFullFileNamesForLoadFromFtp.take();
 
-
-                //  System.err.print(mess);
-                //-----------/fcs_regions/addinfo_Adygeja_Resp_2015120100_2016010100_001.xml.zip
-                //  if(strSrcAbsoluteFileName.equals("/fcs_regions/Amurskaja_obl/contracts/contract_Amurskaja_obl_2017100100_2017110100_001.xml.zip"))
-                //           System.err.print(strSrcAbsoluteFileName);
-                //
-                logger.info(Thread.currentThread().getName() + " " + srcAbsoluteFileName + " : " + new Date() + "Start load to memory ");// + System.lineSeparator()
+                logger.info(Thread.currentThread().getName() + " " + srcAbsoluteFileName + " : " + "Start load to memory ");// + System.lineSeparator()
 
                 OutputStream outputStream = new SpecialByteArrayOutputStream(25000);
 
                 specialFtpClient.retrieveFile(srcAbsoluteFileName, outputStream);
+
                 ((SpecialByteArrayOutputStream) outputStream).setSrcAbsoluteFileName(srcAbsoluteFileName);
 
                 byteArrayOutputStreamsForLocalSave.put(outputStream);
 
-                logger.info(Thread.currentThread().getName() + " " + srcAbsoluteFileName + " : " + new Date() + " Loading in memory Wait saving...");//+ System.lineSeparator()
+                logger.info(Thread.currentThread().getName() + " " + srcAbsoluteFileName + " : " + " Loading in memory Wait saving...");//+ System.lineSeparator()
                 count++;
 
 
             } catch (IOException | InterruptedException e) {
-                logger.error(e);
-                logger.error(" strSrcAbsoluteFileName  load failed ");//+ System.lineSeparator()
+                failureLoadCount++;
+                logger.error("ATTENTON! LOAD FAILED " + srcAbsoluteFileName);
+                logger.error("ATTENTON!  " + srcAbsoluteFileName + " need load at postprocess ");
+                logger.error("ATTENTON!  " + " number of failures while loading: " + failureLoadCount);
                 specialFtpClient.attempRepeatFtpConnection();
 
             }
 
             try {
-                sleep(100);
+                sleep(50);
             } catch (InterruptedException e) {
                 logger.error(e);
             }
 
 
         }
-
-
     }
 
     @Override

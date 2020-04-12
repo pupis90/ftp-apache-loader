@@ -31,9 +31,9 @@ public class FtpLoadBalancer implements ApplicationContextAware {
     @Autowired
     ApplicationConfiguration applicationConfiguration;
 
-    private BlockingQueue<String> srcFullFileNamesForLoadFromFtp;
+    private BlockingQueue<String> srcFullFileNamesForLoadFromFtpBlQueue;
 
-    private BlockingQueue<OutputStream> bufferedOutputStreamsForLocalSave;
+    private BlockingQueue<OutputStream> bufferedOutputStreamsForLocalSaveBlQueue;
 
     private List<Device> devices;
 
@@ -82,8 +82,7 @@ public class FtpLoadBalancer implements ApplicationContextAware {
 
         threadListsAndReadWriteQueueInit();
         specialFtpClient.establishFtpConnection();
-        int deviceCounter = 0;
-        int shift = 5;
+
         for (Thread thread : fileFtpLoaderThreadList) {
             thread.start();
         }
@@ -132,15 +131,15 @@ public class FtpLoadBalancer implements ApplicationContextAware {
      */
 
     private void threadListsAndReadWriteQueueInit() {
-        srcFullFileNamesForLoadFromFtp = new ArrayBlockingQueue<String>(applicationConfiguration.getSourceReadPoolSize());
+        srcFullFileNamesForLoadFromFtpBlQueue = new ArrayBlockingQueue<String>(applicationConfiguration.getLoadFileNamesadQueuesize());
         driverManager = (DriverManager) ctx.getBean("driver-manager");
         devices = driverManager.getDevices();
-        bufferedOutputStreamsForLocalSave = new ArrayBlockingQueue<>(devices.size());
+        bufferedOutputStreamsForLocalSaveBlQueue = new ArrayBlockingQueue<>(devices.size());
         fileFtpLoaderThreadList = new ArrayList<>(applicationConfiguration.getSourceReadPoolSize());
         for (int i = 0; i < applicationConfiguration.getSourceReadPoolSize(); i++) {
             QueueFtpFileLoaderImpl ftpFileLoader = (QueueFtpFileLoaderImpl) ctx.getBean("ftp-file-loader-id");
-            ftpFileLoader.setSrcFullFileNamesForLoadFromFtp(srcFullFileNamesForLoadFromFtp);
-            ftpFileLoader.setByteArrayOutputStreamsForLocalSave(bufferedOutputStreamsForLocalSave);
+            ftpFileLoader.setSrcFullFileNamesForLoadFromFtp(srcFullFileNamesForLoadFromFtpBlQueue);
+            ftpFileLoader.setByteArrayOutputStreamsForLocalSave(bufferedOutputStreamsForLocalSaveBlQueue);
             Thread thread = new Thread(ftpFileLoader);
             thread.setName("FileFtpToBlockingQueueLoader № " + i);
             fileFtpLoaderThreadList.add(thread);
@@ -149,7 +148,7 @@ public class FtpLoadBalancer implements ApplicationContextAware {
         localFileWriterThreadList = new ArrayList<>(devices.size());
         for (int k = 0; k < devices.size(); k++) {
             QueueLocalFileSaverImpl queueLocalFileSaverImpl = ctx.getBean(QueueLocalFileSaverImpl.class);
-            queueLocalFileSaverImpl.setByteArrayOutputStreamsForLocalSave(bufferedOutputStreamsForLocalSave);
+            queueLocalFileSaverImpl.setByteArrayOutputStreamsForLocalSave(bufferedOutputStreamsForLocalSaveBlQueue);
             queueLocalFileSaverImpl.setDestinationRootPath(devices.get(k).getRootDirectory());
             Thread thread = new Thread(queueLocalFileSaverImpl);
             thread.setName("BlockingQueueLocalFileSaver  № " + k);
@@ -189,7 +188,7 @@ public class FtpLoadBalancer implements ApplicationContextAware {
                             mess = Thread.currentThread().getName() + " Ставлю в очередь на загрузку" + strSrcAbsoluteFileName + System.lineSeparator();
                             logger.info(mess);
                             try {
-                                srcFullFileNamesForLoadFromFtp.put(strSrcAbsoluteFileName);
+                                srcFullFileNamesForLoadFromFtpBlQueue.put(strSrcAbsoluteFileName);
                             } catch (InterruptedException e) {
                                 logger.error(e);
                             }

@@ -50,12 +50,26 @@ public class ApplicationConfiguration {
     @Value("${source.read.pool.size}")
     int sourceReadPoolSize;
 
+    public int getLoadFileNamesadQueuesize() {
+        return loadFileNamesadQueuesize;
+    }
+
+    @Value("${source.filenames.queue.size}")
+    int loadFileNamesadQueuesize;
+
     public String getDestinationSubCatalog() {
         return destinationSubCatalog;
     }
 
     @Value("${destination.subcatalog}")
     String destinationSubCatalog;
+
+    public long getDiskC_limit() {
+        return diskC_limit;
+    }
+
+    @Value("${disk.c.count.limit}")
+    private long diskC_limit;
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

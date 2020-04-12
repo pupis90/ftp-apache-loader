@@ -1,6 +1,8 @@
 package vg.ftp.services;
 
 import org.apache.commons.net.ftp.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -15,6 +17,8 @@ import java.io.OutputStream;
 @Scope(value = "prototype")
 public class SpecialFtpClientImpl implements ApplicationContextAware, SpecialFtpClient {
 
+    Logger logger = LogManager.getLogger(SpecialFtpClientImpl.class);
+
     private FTPClient apachFtpClient;
 
     private FtpServerInfo ftpServerInfo;
@@ -25,11 +29,14 @@ public class SpecialFtpClientImpl implements ApplicationContextAware, SpecialFtp
 
     private ApplicationContext ctx;
 
+    String logmessage;
+
     public SpecialFtpClientImpl() {
     }
 
 
     public void establishFtpConnection() {
+
         apachFtpClient = new FTPClient();
         config = (FTPClientConfig) ctx.getBean("client-config");
         ftpServerInfo = (FtpServerInfo) ctx.getBean("server-info");
@@ -45,7 +52,8 @@ public class SpecialFtpClientImpl implements ApplicationContextAware, SpecialFtp
             }
             apachFtpClient.login(ftpServerInfo.user, ftpServerInfo.passw);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
+
         }
     }
 
@@ -54,15 +62,16 @@ public class SpecialFtpClientImpl implements ApplicationContextAware, SpecialFtp
             //    apachFtpClient.connect(ftpServerInfo.ftpServer, 21);
             int reply = apachFtpClient.getReplyCode();
             if (!FTPReply.isPositiveCompletion(reply)) {
-                System.err.print(" По видимому ФТП не отвечает" + System.lineSeparator());
-                System.out.print(apachFtpClient.getReplyString() + System.lineSeparator());
+                logmessage = Thread.currentThread().getName() + " probably FTP server not response:  " + apachFtpClient.getReplyString();
                 apachFtpClient.disconnect();
-                System.err.print(" Переподключение ... " + System.lineSeparator());
+                logmessage = Thread.currentThread().getName() + " retry connection ... ";
+                logger.error(logmessage);
                 establishFtpConnection();
             }
             //   apachFtpClient.login(ftpServerInfo.user, ftpServerInfo.passw);
         } catch (Exception e2) {
-            e2.printStackTrace();
+            logger.error(e2);
+
         }
 
     }

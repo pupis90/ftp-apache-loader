@@ -4,7 +4,7 @@ public interface FtpFileLoader extends Runnable {
 
     public int loadFile(String dir);
 
-    int loadFiles();
+    void loadFiles();
 
     public int loadDir(String dir);
 

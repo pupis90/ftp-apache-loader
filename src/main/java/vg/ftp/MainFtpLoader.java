@@ -26,6 +26,7 @@ public class MainFtpLoader {
         config.setLenientFutureDates(true); // change required options
         config.setServerLanguageCode("ru");
         Environment environment = ctx.getEnvironment();
+        Thread.currentThread().setName("MainFtpLoader");
 
         try {
             FtpMetaInfoLoader ftpMetaInfoLoader = (FtpMetaInfoLoader) ctx.getBean("informer");
