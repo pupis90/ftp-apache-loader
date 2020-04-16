@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 import vg.ftp.config.ApplicationConfiguration;
 import vg.ftp.model.Device;
@@ -22,7 +24,7 @@ import java.util.concurrent.BlockingQueue;
 import static java.lang.Thread.sleep;
 
 @Service
-public class FtpLoadBalancer implements ApplicationContextAware {
+public class FtpLoadBalancer implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger logger = LogManager.getLogger(FtpLoadBalancer.class);
 
@@ -227,5 +229,11 @@ public class FtpLoadBalancer implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.ctx = applicationContext;
+    }
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
+
+
     }
 }
